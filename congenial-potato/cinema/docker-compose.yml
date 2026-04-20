@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  web:
+    container_name: cinema_web
+    image: mshegolev/congenial-potato:v1.0
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    depends_on: 
+      - db
+    ports:
+      - "8000:80"
+
+  db:
+    container_name: cinema_db
+    image: mariadb
+    restart: always
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      interval: 5s
+      retries: 5
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: test
+      MYSQL_DATABASE: database
+    ports:
+      - "9906:3306"
+  phpmyadmin:
+    container_name: cinema_phpadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+    ports:
+      - '8081:80'
